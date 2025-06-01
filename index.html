@@ -36,7 +36,7 @@
                 <button onclick="toggleMobileFilters()" id="mobileFilterButton">
                     <span>🔍</span> Показать фильтры
                 </button>
-            </div>
+    </div>
 
             <!-- Панель фильтров -->
             <div class="filter-bar" id="filterBar">
@@ -63,13 +63,13 @@
                 <div class="filter-group">
                     <input type="text" id="searchInput" placeholder="Поиск..." oninput="filterShipments()">
                 </div>
-            </div>
+      </div>
 
             <!-- Контейнер с данными -->
             <div class="table-container">
                 <!-- Десктопная таблица -->
                 <table id="shipmentsTable" class="desktop-table">
-                    <thead>
+          <thead>
                         <tr>
                             <th>Дата отправки</th>
                             <th>Город отправления</th>
@@ -82,16 +82,16 @@
                             <th>Описание</th>
                             <th>Статус</th>
                             <th>Действия</th>
-                        </tr>
-                    </thead>
+            </tr>
+          </thead>
                     <tbody></tbody>
-                </table>
+        </table>
                 
                 <!-- Мобильные карточки -->
                 <div id="mobileCards" class="mobile-cards"></div>
-            </div>
-        </div>
+      </div>
     </div>
+  </div>
 
     <!-- Модальное окно для создания/редактирования отправки -->
     <div id="shipmentModal" class="modal">
@@ -149,6 +149,17 @@
                     <input type="number" id="packages" required min="1">
                 </div>
                 
+                <!-- Секция позиций груза -->
+                <div class="form-group">
+                    <label>Позиции груза</label>
+                    <div id="cargoItems" class="cargo-items">
+                        <!-- Сюда будут добавляться позиции груза -->
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addCargoItem()">
+                        <span>➕</span> Добавить позицию
+                    </button>
+                </div>
+                
                 <div class="form-group">
                     <label>Описание груза</label>
                     <textarea id="description" required></textarea>
@@ -159,10 +170,42 @@
         </div>
     </div>
 
+    <!-- Шаблон для позиции груза -->
+    <template id="cargoItemTemplate">
+        <div class="cargo-item">
+            <div class="cargo-item-header">
+                <h4>Позиция #<span class="item-number"></span></h4>
+                <button type="button" class="btn btn-danger" onclick="removeCargoItem(this)">🗑️</button>
+            </div>
+            <div class="cargo-item-content">
+                <div class="form-group">
+                    <label>Описание позиции</label>
+                    <input type="text" class="cargo-description" required>
+                </div>
+                <div class="form-group">
+                    <label>Количество</label>
+                    <input type="number" class="cargo-quantity" required min="1" value="1">
+                </div>
+                <div class="form-group">
+                    <label>Тип назначения</label>
+                    <select class="cargo-destination-type" required onchange="handleDestinationTypeChange(this)">
+                        <option value="">Выберите тип...</option>
+                        <!-- Опции будут добавлены через JavaScript -->
+                    </select>
+                </div>
+                <div class="form-group return-date-group" style="display: none;">
+                    <label>Дата возврата</label>
+                    <input type="date" class="cargo-return-date">
+                </div>
+            </div>
+        </div>
+    </template>
+
     <!-- Уведомления -->
     <div id="notification" class="notification"></div>
 
     <!-- Подключение JavaScript -->
+    <script src="constants.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

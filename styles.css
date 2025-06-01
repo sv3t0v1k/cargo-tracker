@@ -558,6 +558,12 @@ input[list]::-webkit-calendar-picker-indicator:hover {
     display: none;
 }
 
+/* Десктопная таблица (показана по умолчанию) */
+.desktop-table {
+    display: table;
+    width: 100%;
+}
+
 /* МОБИЛЬНАЯ ВЕРСИЯ */
 @media (max-width: 768px) {
     .container {
@@ -811,5 +817,91 @@ input[list]::-webkit-calendar-picker-indicator:hover {
         padding: 16px;
         font-size: 16px;
         border-radius: 8px;
+    }
+}
+
+/* Стили для позиций груза */
+.cargo-items {
+    margin-bottom: 15px;
+}
+
+.cargo-item {
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 15px;
+    padding: 15px;
+    animation: slideInDown 0.3s var(--easing-bounce);
+}
+
+.cargo-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.cargo-item-header h4 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+.cargo-item-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.cargo-item .form-group {
+    margin-bottom: 0;
+}
+
+/* Анимация для удаления позиции */
+.cargo-item.removing {
+    animation: slideInUp 0.3s var(--easing-bounce) reverse;
+}
+
+/* Мобильная версия для позиций груза */
+@media (max-width: 768px) {
+    .cargo-item-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .cargo-item {
+        padding: 10px;
+    }
+}
+
+/* Стили для отображения позиций груза в таблице */
+.cargo-details {
+    max-width: 400px;
+}
+
+.cargo-description {
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.cargo-items-list {
+    font-size: 0.9em;
+    color: var(--text-secondary-color);
+    white-space: pre-line;
+}
+
+.cargo-item-list > div {
+    margin-bottom: 4px;
+}
+
+/* Стили для мобильной версии */
+@media (max-width: 768px) {
+    .cargo-details {
+        max-width: none;
+    }
+    
+    .cargo-items-list {
+        margin-top: 8px;
+        padding-left: 12px;
+        border-left: 2px solid var(--border-color);
     }
 } 

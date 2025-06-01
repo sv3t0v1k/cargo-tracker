@@ -30,6 +30,7 @@ class ShipmentStore {
             });
             if (!response.ok) throw new Error('Ошибка сохранения данных');
         } catch (error) {
+            console.error('Ошибка сохранения:', error);
             showNotification('Ошибка при сохранении данных', 'error');
         }
     }
@@ -54,13 +55,24 @@ class ShipmentStore {
     }
 
     async deleteShipment(id) {
-        const index = this.shipments.findIndex(s => s.id === id);
-        if (index !== -1) {
-            this.shipments.splice(index, 1);
-            await this.saveShipments();
-            return true;
+        if (confirm('Вы уверены, что хотите удалить эту отправку?')) {
+            try {
+                const response = await fetch(`/api/shipments/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка при удалении');
+                }
+
+                showNotification('Отправка успешно удалена', 'success');
+                await this.loadShipments();
+                filterShipments();
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Ошибка при удалении отправки', 'error');
+            }
         }
-        return false;
     }
 
     async clearAllShipments() {
@@ -84,6 +96,7 @@ class ShipmentStore {
 
 // Глобальные переменные
 const store = new ShipmentStore();
+let currentShipmentId = null;
 let currentFilters = {
     dateFrom: '',
     dateTo: '',
@@ -92,13 +105,11 @@ let currentFilters = {
     search: ''
 };
 
+let cargoItemCounter = 1;
+
 // Утилиты
 function formatDate(dateString) {
     if (!dateString) return '';
-    
-    if (typeof dateString === 'string' && dateString.includes('.')) {
-        return dateString;
-    }
     
     let date;
     
@@ -169,137 +180,118 @@ function showNotification(message, type = 'success') {
 }
 
 // Рендеринг данных
+function formatCargoItems(items) {
+    if (!items || !Array.isArray(items)) return '';
+    
+    return items.map(item => {
+        const type = DESTINATION_TYPES[Object.keys(DESTINATION_TYPES).find(key => 
+            DESTINATION_TYPES[key].id === item.destinationType
+        )];
+        
+        let text = `${item.description} (${item.quantity} шт.) - ${type.name}`;
+        if (item.returnDate) {
+            text += `, возврат: ${formatDate(item.returnDate)}`;
+        }
+        return text;
+    }).join('\n');
+}
+
 function renderShipments(shipments) {
-    // Рендеринг для десктопа
     const tbody = document.querySelector('#shipmentsTable tbody');
+    tbody.innerHTML = '';
     
-    if (tbody.children.length > 0) {
-        Array.from(tbody.children).forEach((row, index) => {
-            row.style.animation = `slideInUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) reverse`;
-            row.style.animationDelay = `${index * 0.03}s`;
-        });
+    shipments.forEach(shipment => {
+        const tr = document.createElement('tr');
+        const shipmentJson = JSON.stringify(shipment).replace(/'/g, "\\'").replace(/"/g, '&quot;');
         
-        setTimeout(() => {
-            tbody.innerHTML = '';
-            addNewRows();
-        }, Math.min(shipments.length * 30 + 150, 400));
-    } else {
-        addNewRows();
-    }
+        tr.innerHTML = `
+            <td>${formatDate(shipment.shippingDate)}</td>
+            <td>${shipment.shippingCity}</td>
+            <td>${shipment.shipperName}</td>
+            <td>${formatDate(shipment.deliveryDate) || '-'}</td>
+            <td>${shipment.deliveryCity || '-'}</td>
+            <td>${shipment.receiverName || '-'}</td>
+            <td>${shipment.carrier}</td>
+            <td>${shipment.packages}</td>
+            <td>
+                <div class="cargo-details">
+                    <div class="cargo-description">${shipment.description}</div>
+                    <div class="cargo-items-list">${formatCargoItems(shipment.cargoItems)}</div>
+                </div>
+            </td>
+            <td><span class="status-${shipment.status}">${shipment.status === 'delivered' ? 'Доставлен' : 'В пути'}</span></td>
+            <td>
+                <button onclick='openEditModal(${shipmentJson})' class="btn btn-primary btn-sm">✏️</button>
+                <button onclick="deleteShipment('${shipment.id}')" class="btn btn-danger btn-sm">🗑️</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 
-    function addNewRows() {
-        shipments.forEach((shipment, index) => {
-            const tr = document.createElement('tr');
-            tr.style.opacity = '0';
-            tr.innerHTML = `
-                <td>${formatDate(shipment.shippingDate)}</td>
-                <td>${shipment.shippingCity}</td>
-                <td>${shipment.shipperName}</td>
-                <td>${formatDate(shipment.deliveryDate)}</td>
-                <td>${shipment.deliveryCity || ''}</td>
-                <td>${shipment.receiverName || ''}</td>
-                <td>${shipment.carrier}</td>
-                <td>${shipment.packages}</td>
-                <td>${shipment.description}</td>
-                <td><span class="status-${shipment.status}">${shipment.status === 'delivered' ? 'Доставлен' : 'В пути'}</span></td>
-                <td class="actions">
-                    <button class="btn btn-secondary" onclick="editShipment('${shipment.id}')">✏️</button>
-                    <button class="btn btn-danger" onclick="deleteShipment('${shipment.id}')">🗑️</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-            
-            setTimeout(() => {
-                tr.style.animation = `slideInUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)`;
-                tr.style.opacity = '1';
-            }, index * 60);
-        });
-    }
-
-    // Рендеринг для мобильных
+    // Обновляем мобильное представление
     const mobileCards = document.getElementById('mobileCards');
+    mobileCards.innerHTML = '';
     
-    if (mobileCards.children.length > 0) {
-        Array.from(mobileCards.children).forEach((card, index) => {
-            card.style.animation = `slideInUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) reverse`;
-            card.style.animationDelay = `${index * 0.04}s`;
-        });
+    shipments.forEach(shipment => {
+        const card = document.createElement('div');
+        card.className = 'mobile-card';
+        const shipmentJson = JSON.stringify(shipment).replace(/'/g, "\\'").replace(/"/g, '&quot;');
         
-        setTimeout(() => {
-            mobileCards.innerHTML = '';
-            addNewCards();
-        }, Math.min(shipments.length * 40 + 200, 500));
-    } else {
-        addNewCards();
-    }
-
-    function addNewCards() {
-        shipments.forEach((shipment, index) => {
-            const card = document.createElement('div');
-            card.className = 'mobile-card';
-            card.style.opacity = '0';
-            
-            const statusClass = shipment.status === 'delivered' ? 'delivered' : 'pending';
-            const statusText = shipment.status === 'delivered' ? 'Доставлен' : 'В пути';
-            
-            card.innerHTML = `
-                <div class="mobile-field">
-                    <div class="mobile-field-label">Дата отправки:</div>
-                    <div class="mobile-field-value">${formatDate(shipment.shippingDate)}</div>
+        card.innerHTML = `
+            <div class="mobile-field">
+                <div class="mobile-field-label">Дата отправки</div>
+                <div class="mobile-field-value">${formatDate(shipment.shippingDate)}</div>
+            </div>
+            <div class="mobile-field">
+                <div class="mobile-field-label">Город отправления</div>
+                <div class="mobile-field-value">${shipment.shippingCity}</div>
+            </div>
+            <div class="mobile-field">
+                <div class="mobile-field-label">Отправитель</div>
+                <div class="mobile-field-value">${shipment.shipperName}</div>
+            </div>
+            <div class="mobile-field">
+                <div class="mobile-field-label">Дата получения</div>
+                <div class="mobile-field-value">${formatDate(shipment.deliveryDate) || '-'}</div>
+            </div>
+            <div class="mobile-field">
+                <div class="mobile-field-label">Город получения</div>
+                <div class="mobile-field-value">${shipment.deliveryCity || '-'}</div>
+            </div>
+            <div class="mobile-field">
+                <div class="mobile-field-label">Получатель</div>
+                <div class="mobile-field-value">${shipment.receiverName || '-'}</div>
+            </div>
+            <div class="mobile-field">
+                <div class="mobile-field-label">Перевозчик</div>
+                <div class="mobile-field-value">${shipment.carrier}</div>
+            </div>
+            <div class="mobile-field">
+                <div class="mobile-field-label">Мест</div>
+                <div class="mobile-field-value">${shipment.packages}</div>
+            </div>
+            <div class="mobile-field description">
+                <div class="mobile-field-label">Описание</div>
+                <div class="mobile-field-value">
+                    <div class="cargo-description">${shipment.description}</div>
+                    <div class="cargo-items-list">${formatCargoItems(shipment.cargoItems)}</div>
                 </div>
-                <div class="mobile-field">
-                    <div class="mobile-field-label">Город отправления:</div>
-                    <div class="mobile-field-value">${shipment.shippingCity}</div>
+            </div>
+            <div class="mobile-field">
+                <div class="mobile-field-label">Статус</div>
+                <div class="mobile-field-value">
+                    <span class="mobile-status ${shipment.status}">${shipment.status === 'delivered' ? 'Доставлен' : 'В пути'}</span>
                 </div>
-                <div class="mobile-field">
-                    <div class="mobile-field-label">Отправитель:</div>
-                    <div class="mobile-field-value">${shipment.shipperName}</div>
+            </div>
+            <div class="mobile-field actions">
+                <div class="mobile-actions">
+                    <button onclick='openEditModal(${shipmentJson})' class="btn btn-primary">✏️ Изменить</button>
+                    <button onclick="deleteShipment('${shipment.id}')" class="btn btn-danger">🗑️ Удалить</button>
                 </div>
-                <div class="mobile-field">
-                    <div class="mobile-field-label">Дата получения:</div>
-                    <div class="mobile-field-value">${formatDate(shipment.deliveryDate)}</div>
-                </div>
-                <div class="mobile-field">
-                    <div class="mobile-field-label">Город получения:</div>
-                    <div class="mobile-field-value">${shipment.deliveryCity || ''}</div>
-                </div>
-                <div class="mobile-field">
-                    <div class="mobile-field-label">Получатель:</div>
-                    <div class="mobile-field-value">${shipment.receiverName || ''}</div>
-                </div>
-                <div class="mobile-field">
-                    <div class="mobile-field-label">Перевозчик:</div>
-                    <div class="mobile-field-value">${shipment.carrier}</div>
-                </div>
-                <div class="mobile-field">
-                    <div class="mobile-field-label">Мест:</div>
-                    <div class="mobile-field-value">${shipment.packages}</div>
-                </div>
-                <div class="mobile-field description">
-                    <div class="mobile-field-label">Описание:</div>
-                    <div class="mobile-field-value">${shipment.description}</div>
-                </div>
-                <div class="mobile-field">
-                    <div class="mobile-field-label">Статус:</div>
-                    <div class="mobile-field-value">
-                        <span class="mobile-status ${statusClass}">${statusText}</span>
-                    </div>
-                </div>
-                <div class="mobile-field actions">
-                    <div class="mobile-actions">
-                        <button class="btn btn-secondary" onclick="editShipment('${shipment.id}')">✏️ Изменить</button>
-                        <button class="btn btn-danger" onclick="deleteShipment('${shipment.id}')">🗑️ Удалить</button>
-                    </div>
-                </div>
-            `;
-            mobileCards.appendChild(card);
-            
-            setTimeout(() => {
-                card.style.animation = `slideInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)`;
-                card.style.opacity = '1';
-            }, index * 100);
-        });
-    }
+            </div>
+        `;
+        mobileCards.appendChild(card);
+    });
 }
 
 // Фильтрация
@@ -315,10 +307,16 @@ function filterShipments() {
     let filtered = store.getShipments();
 
     if (currentFilters.dateFrom) {
-        filtered = filtered.filter(s => s.shippingDate >= currentFilters.dateFrom);
+        filtered = filtered.filter(s => {
+            const shipDate = convertToInputDate(s.shippingDate);
+            return shipDate >= currentFilters.dateFrom;
+        });
     }
     if (currentFilters.dateTo) {
-        filtered = filtered.filter(s => s.shippingDate <= currentFilters.dateTo);
+        filtered = filtered.filter(s => {
+            const shipDate = convertToInputDate(s.shippingDate);
+            return shipDate <= currentFilters.dateTo;
+        });
     }
     if (currentFilters.status) {
         filtered = filtered.filter(s => s.status === currentFilters.status);
@@ -359,41 +357,55 @@ function openNewShipmentModal() {
     }, 10);
 }
 
-function editShipment(id) {
-    const shipment = store.getShipments().find(s => s.id === id);
+function openEditModal(shipment = null) {
+    currentShipmentId = shipment ? shipment.id : null;
+    const modal = document.getElementById('shipmentModal');
+    const form = modal.querySelector('form');
+    
+    // Обновляем заголовок модального окна
+    document.getElementById('modalTitle').textContent = shipment ? 'Редактировать отправку' : 'Новая отправка';
+    
+    // Очищаем существующие позиции груза
+    document.getElementById('cargoItems').innerHTML = '';
+    cargoItemCounter = 1;
+    
     if (shipment) {
-        document.getElementById('modalTitle').textContent = 'Редактировать отправку';
-        document.getElementById('shipmentId').value = id;
+        // Заполняем основные поля
+        Object.keys(shipment).forEach(key => {
+            const input = document.getElementById(key);
+            if (input && key !== 'cargoItems' && key !== 'id' && key !== 'status') {
+                if (key.includes('Date')) {
+                    input.value = convertToInputDate(shipment[key]);
+                } else {
+                    input.value = shipment[key];
+                }
+            }
+        });
         
-        const fields = [
-            { id: 'shippingDate', value: convertToInputDate(shipment.shippingDate) },
-            { id: 'shippingCity', value: shipment.shippingCity },
-            { id: 'shipperName', value: shipment.shipperName },
-            { id: 'deliveryDate', value: convertToInputDate(shipment.deliveryDate) },
-            { id: 'deliveryCity', value: shipment.deliveryCity || '' },
-            { id: 'receiverName', value: shipment.receiverName || '' },
-            { id: 'carrier', value: shipment.carrier },
-            { id: 'packages', value: shipment.packages },
-            { id: 'description', value: shipment.description }
-        ];
-        
-        const modal = document.getElementById('shipmentModal');
-        modal.style.display = 'flex';
-        modal.style.opacity = '0';
-        
-        setTimeout(() => {
-            modal.style.animation = 'fadeIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-            modal.style.opacity = '1';
-            
-            fields.forEach((field, index) => {
-                setTimeout(() => {
-                    const element = document.getElementById(field.id);
-                    element.style.animation = 'pulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                    element.value = field.value;
-                }, index * 120);
+        // Добавляем позиции груза
+        if (shipment.cargoItems && Array.isArray(shipment.cargoItems)) {
+            shipment.cargoItems.forEach(item => {
+                addCargoItem();
+                const lastItem = document.querySelector('.cargo-item:last-child');
+                lastItem.querySelector('.cargo-description').value = item.description;
+                lastItem.querySelector('.cargo-quantity').value = item.quantity;
+                lastItem.querySelector('.cargo-destination-type').value = item.destinationType;
+                if (item.returnDate) {
+                    const returnDateGroup = lastItem.querySelector('.return-date-group');
+                    const returnDateInput = lastItem.querySelector('.cargo-return-date');
+                    returnDateGroup.style.display = 'block';
+                    returnDateInput.value = convertToInputDate(item.returnDate);
+                }
+                handleDestinationTypeChange(lastItem.querySelector('.cargo-destination-type'));
             });
-        }, 10);
+        }
+    } else {
+        form.reset();
+        // Добавляем первую пустую позицию груза
+        addCargoItem();
     }
+    
+    modal.style.display = 'block';
 }
 
 function closeModal() {
@@ -408,46 +420,54 @@ function closeModal() {
 async function saveShipment(event) {
     event.preventDefault();
     
-    const formData = {
-        shippingDate: document.getElementById('shippingDate').value,
-        shippingCity: document.getElementById('shippingCity').value,
-        shipperName: document.getElementById('shipperName').value,
-        deliveryDate: document.getElementById('deliveryDate').value,
-        deliveryCity: document.getElementById('deliveryCity').value,
-        receiverName: document.getElementById('receiverName').value,
-        carrier: document.getElementById('carrier').value,
-        packages: parseInt(document.getElementById('packages').value),
-        description: document.getElementById('description').value
-    };
-    
-    const shipmentId = document.getElementById('shipmentId').value;
-    
     try {
-        if (shipmentId) {
-            await store.updateShipment(shipmentId, formData);
-            showNotification('Отправка обновлена');
-        } else {
-            await store.addShipment(formData);
-            showNotification('Отправка добавлена');
-        }
-        
-        closeModal();
-        filterShipments();
-    } catch (error) {
-        showNotification('Ошибка при сохранении', 'error');
-    }
-}
+        // Собираем данные формы
+        const shipment = {
+            shippingDate: document.getElementById('shippingDate').value,
+            shippingCity: document.getElementById('shippingCity').value,
+            shipperName: document.getElementById('shipperName').value,
+            deliveryDate: document.getElementById('deliveryDate').value,
+            deliveryCity: document.getElementById('deliveryCity').value,
+            receiverName: document.getElementById('receiverName').value,
+            carrier: document.getElementById('carrier').value,
+            packages: parseInt(document.getElementById('packages').value),
+            description: document.getElementById('description').value,
+            cargoItems: getCargoItems(),
+            id: currentShipmentId || Date.now().toString(),
+            status: document.getElementById('deliveryDate').value ? 'delivered' : 'pending'
+        };
 
-// Удаление данных
-async function deleteShipment(id) {
-    if (confirm('Вы уверены, что хотите удалить эту отправку?')) {
-        try {
-            await store.deleteShipment(id);
-            showNotification('Отправка удалена');
-            filterShipments();
-        } catch (error) {
-            showNotification('Ошибка при удалении', 'error');
+        // Проверяем обязательные поля
+        if (!shipment.shippingDate || !shipment.shippingCity || !shipment.shipperName || 
+            !shipment.carrier || !shipment.packages || !shipment.description) {
+            throw new Error('Пожалуйста, заполните все обязательные поля');
         }
+
+        // Проверяем наличие позиций груза
+        if (!shipment.cargoItems || shipment.cargoItems.length === 0) {
+            throw new Error('Добавьте хотя бы одну позицию груза');
+        }
+
+        // Отправляем запрос на сервер
+        const response = await fetch('/api/shipments', {
+            method: currentShipmentId ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(shipment)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Ошибка при сохранении');
+        }
+
+        // Если всё успешно
+        showNotification('Груз успешно сохранен', 'success');
+        closeModal();
+        await store.loadShipments(); // Ждём загрузки данных
+        filterShipments(); // Обновляем отображение с учётом фильтров
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification(error.message || 'Ошибка при сохранении груза', 'error');
     }
 }
 
@@ -456,7 +476,7 @@ async function clearAllData() {
         try {
             await store.clearAllShipments();
             showNotification('Все данные удалены');
-            filterShipments();
+            await store.loadShipments();
         } catch (error) {
             showNotification('Ошибка при очистке данных', 'error');
         }
@@ -491,6 +511,17 @@ function toggleMobileFilters() {
     }
 }
 
+// Делаем функции глобальными
+window.openNewShipmentModal = openNewShipmentModal;
+window.editShipment = openEditModal;
+window.closeModal = closeModal;
+window.saveShipment = saveShipment;
+window.deleteShipment = deleteShipment;
+window.clearAllData = clearAllData;
+window.toggleTheme = toggleTheme;
+window.toggleMobileFilters = toggleMobileFilters;
+window.filterShipments = filterShipments;
+
 // Инициализация
 document.addEventListener('DOMContentLoaded', function() {
     // Устанавливаем тему
@@ -500,12 +531,16 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('themeButton').textContent = '☀️';
     }
     
-    // Устанавливаем фильтр на последние 7 дней
+    // Устанавливаем фильтр на последние 7 дней (включая сегодня)
     const today = new Date();
-    const sevenDaysAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    today.setHours(0, 0, 0, 0); // Устанавливаем время на начало дня
     
-    const todayStr = today.toISOString().split('T')[0];
-    const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0];
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(today.getDate() - 6); // -6 дней от сегодня = 7 дней включая сегодня
+    
+    // Форматируем даты в YYYY-MM-DD с учетом локального времени
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const sevenDaysAgoStr = `${sevenDaysAgo.getFullYear()}-${String(sevenDaysAgo.getMonth() + 1).padStart(2, '0')}-${String(sevenDaysAgo.getDate()).padStart(2, '0')}`;
     
     document.getElementById('dateFrom').value = sevenDaysAgoStr;
     document.getElementById('dateTo').value = todayStr;
@@ -523,6 +558,62 @@ document.addEventListener('DOMContentLoaded', function() {
             closeModal();
         }
     });
+});
+
+function addCargoItem() {
+    const template = document.getElementById('cargoItemTemplate');
+    const cargoItems = document.getElementById('cargoItems');
+    const clone = template.content.cloneNode(true);
     
-    console.log('Приложение инициализировано');
-}); 
+    // Установка номера позиции
+    clone.querySelector('.item-number').textContent = cargoItemCounter++;
+    
+    // Заполнение select опциями типов назначения
+    const select = clone.querySelector('.cargo-destination-type');
+    Object.values(DESTINATION_TYPES).forEach(type => {
+        const option = document.createElement('option');
+        option.value = type.id;
+        option.textContent = type.name;
+        select.appendChild(option);
+    });
+    
+    cargoItems.appendChild(clone);
+}
+
+function removeCargoItem(button) {
+    const cargoItem = button.closest('.cargo-item');
+    cargoItem.classList.add('removing');
+    setTimeout(() => cargoItem.remove(), 300);
+}
+
+function handleDestinationTypeChange(select) {
+    const cargoItem = select.closest('.cargo-item');
+    const returnDateGroup = cargoItem.querySelector('.return-date-group');
+    const returnDateInput = cargoItem.querySelector('.cargo-return-date');
+    
+    const selectedType = DESTINATION_TYPES[Object.keys(DESTINATION_TYPES).find(key => 
+        DESTINATION_TYPES[key].id === select.value
+    )];
+    
+    if (selectedType && selectedType.requiresReturn) {
+        returnDateGroup.style.display = 'block';
+        returnDateInput.required = true;
+    } else {
+        returnDateGroup.style.display = 'none';
+        returnDateInput.required = false;
+        returnDateInput.value = '';
+    }
+}
+
+function getCargoItems() {
+    const items = [];
+    document.querySelectorAll('.cargo-item').forEach(item => {
+        items.push({
+            description: item.querySelector('.cargo-description').value,
+            quantity: parseInt(item.querySelector('.cargo-quantity').value),
+            destinationType: item.querySelector('.cargo-destination-type').value,
+            returnDate: item.querySelector('.cargo-return-date').value || null
+        });
+    });
+    return items;
+} 
