@@ -465,18 +465,21 @@ async function saveShipment(event) {
             throw new Error('Добавьте хотя бы одну позицию груза');
         }
 
-        let success;
-        if (currentShipmentId) {
-            success = await store.updateShipment(currentShipmentId, shipment);
-        } else {
-            success = await store.addShipment(shipment);
+        const response = await fetch('/api/shipments', {
+            method: currentShipmentId ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(shipment)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Ошибка при сохранении');
         }
 
-        if (success) {
-            showNotification('Груз успешно сохранен', 'success');
-            closeModal();
-            filterShipments();
-        }
+        showNotification('Груз успешно сохранен', 'success');
+        closeModal();
+        await store.loadShipments();
+        filterShipments();
     } catch (error) {
         console.error('Error:', error);
         showNotification(error.message || 'Ошибка при сохранении груза', 'error');
@@ -599,7 +602,7 @@ function removeCargoItem(button) {
 }
 
 function handleDestinationTypeChange(select) {
-    // Функция оставлена для совместимости и возможных будущих расширений
+    // Пустая функция, оставлена для совместимости
     console.log('Тип назначения изменен:', select.value);
 }
 

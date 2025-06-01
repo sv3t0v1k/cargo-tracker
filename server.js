@@ -23,20 +23,18 @@ function validateShipment(shipment) {
         throw new Error('At least one cargo item is required');
     }
     
+    const { DESTINATION_TYPES } = require('./constants');
+    
     shipment.cargoItems.forEach((item, index) => {
         if (!item.description || !item.quantity || !item.destinationType) {
             throw new Error(`Invalid cargo item at position ${index + 1}`);
         }
         
-        const destinationType = Object.values(require('./constants').DESTINATION_TYPES)
+        const destinationType = Object.values(DESTINATION_TYPES)
             .find(type => type.id === item.destinationType);
             
         if (!destinationType) {
             throw new Error(`Invalid destination type at position ${index + 1}`);
-        }
-        
-        if (destinationType.requiresReturn && !item.returnDate) {
-            throw new Error(`Return date is required for ${destinationType.name} at position ${index + 1}`);
         }
     });
 }
@@ -52,7 +50,7 @@ app.get('/api/shipments', async (req, res) => {
     }
 });
 
-// Сохранение данных
+// Создание новой отправки
 app.post('/api/shipments', async (req, res) => {
     try {
         validateShipment(req.body);
@@ -60,17 +58,22 @@ app.post('/api/shipments', async (req, res) => {
         const data = await fs.readFile(DATA_FILE, 'utf8');
         const shipments = JSON.parse(data);
         
-        shipments.push(req.body);
+        const newShipment = {
+            ...req.body,
+            id: req.body.id || Date.now().toString()
+        };
+        
+        shipments.push(newShipment);
         
         await fs.writeFile(DATA_FILE, JSON.stringify(shipments, null, 2));
-        res.json(req.body);
+        res.json(newShipment);
     } catch (error) {
         console.error('Error adding shipment:', error);
         res.status(400).json({ error: error.message });
     }
 });
 
-// Обновление существующего груза
+// Обновление существующей отправки
 app.put('/api/shipments', async (req, res) => {
     try {
         validateShipment(req.body);
@@ -93,7 +96,7 @@ app.put('/api/shipments', async (req, res) => {
     }
 });
 
-// Удаление груза
+// Удаление отправки
 app.delete('/api/shipments/:id', async (req, res) => {
     try {
         const data = await fs.readFile(DATA_FILE, 'utf8');

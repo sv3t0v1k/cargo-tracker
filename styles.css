@@ -23,18 +23,18 @@
     --easing-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     --easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-    /* Цвета для светлой темы */
-    --cargo-sale-bg: #ff7676;
+    /* Светлая тема */
+    --cargo-sale-bg: #ffd7d7;
     --cargo-sale-text: #000000;
-    --cargo-sale-border: #ff7676;
     
     --cargo-rent-return-bg: #9afc93;
     --cargo-rent-return-text: #000000;
-    --cargo-rent-return-border: #9afc93;
     
     --cargo-rent-no-return-bg: #fff585;
     --cargo-rent-no-return-text: #000000;
-    --cargo-rent-no-return-border: #fff585  ;
+    
+    --cargo-service-bg: #a8e6cf;
+    --cargo-service-text: #000000;
 }
 
 [data-theme="dark"] {
@@ -53,6 +53,19 @@
     --modal-overlay: rgba(0,0,0,0.75);
     --btn-text-color: white;
     --btn-secondary-text: #333;
+
+    /* Темная тема */
+    --cargo-sale-bg: #ff9e9e;
+    --cargo-sale-text: #000000;
+    
+    --cargo-rent-return-bg: #9cff9f;
+    --cargo-rent-return-text: #000000;
+    
+    --cargo-rent-no-return-bg: #ffee82;
+    --cargo-rent-no-return-text: #000000;
+    
+    --cargo-service-bg: #8cd3b4;
+    --cargo-service-text: #000000;
 }
 
 /* Темная тема */
@@ -62,13 +75,13 @@
         --cargo-sale-text: #000000;
         --cargo-sale-border: #ff9696;
         
-        --cargo-rent-return-bg: #9cff9f;
-        --cargo-rent-return-text: #000000;
-        --cargo-rent-return-border: #9cff9f;
+        --cargo-rent-bg: #ffee82;
+        --cargo-rent-text: #000000;
+        --cargo-rent-border: #ffee82;
         
-        --cargo-rent-no-return-bg: #ffee82;
-        --cargo-rent-no-return-text: #000000;
-        --cargo-rent-no-return-border: #ffee82;
+        --cargo-service-bg: #8cd3b4;
+        --cargo-service-text: #000000;
+        --cargo-service-border: #8cd3b4;
     }
 }
 
@@ -862,90 +875,121 @@ input[list]::-webkit-calendar-picker-indicator:hover {
     padding: 15px;
 }
 
-/* Стили для разных типов назначения */
-.cargo-item[data-type="sale"] {
-    background-color: var(--cargo-sale-bg);
-    color: var(--cargo-sale-text);
-    border: 1px solid var(--cargo-sale-border);
-}
-
-.cargo-item[data-type="rent_return"] {
-    background-color: var(--cargo-rent-return-bg);
-    color: var(--cargo-rent-return-text);
-    border: 1px solid var(--cargo-rent-return-border);
-}
-
-.cargo-item[data-type="rent_no_return"] {
-    background-color: var(--cargo-rent-no-return-bg);
-    color: var(--cargo-rent-no-return-text);
-    border: 1px solid var(--cargo-rent-no-return-border);
-}
-
-/* Стили для отображения в таблице */
+/* Стили для блоков типов груза в таблице */
 .cargo-items-list .cargo-item-row {
     padding: 4px 8px;
-    margin-bottom: 4px;
-    border-radius: 4px;
+    border-radius: 6px;
+    margin: 2px 0;
+    display: inline-block;
 }
 
 .cargo-items-list .cargo-item-row[data-type="sale"] {
     background-color: var(--cargo-sale-bg);
     color: var(--cargo-sale-text);
+    border-radius: 6px;
 }
 
 .cargo-items-list .cargo-item-row[data-type="rent_return"] {
     background-color: var(--cargo-rent-return-bg);
     color: var(--cargo-rent-return-text);
+    border-radius: 6px;
 }
 
 .cargo-items-list .cargo-item-row[data-type="rent_no_return"] {
     background-color: var(--cargo-rent-no-return-bg);
     color: var(--cargo-rent-no-return-text);
+    border-radius: 6px;
 }
 
-/* Стили для мобильной версии */
-@media (max-width: 768px) {
-    .cargo-details {
-        max-width: none;
-    }
-    
-    .cargo-items-list {
-        margin-top: 8px;
-        padding-left: 12px;
-        border-left: 2px solid var(--border-color);
-    }
+.cargo-items-list .cargo-item-row[data-type="service"] {
+    background-color: var(--cargo-service-bg);
+    color: var(--cargo-service-text);
+    border-radius: 6px;
 }
 
-/* Стили для отображения версии */
-.version-info {
-    position: fixed;
-    bottom: 10px;
-    left: 10px;
-    font-size: 12px;
-    opacity: 0.3;
-    font-family: monospace;
-    z-index: 1000;
-    transition: all 0.3s ease;
-    color: var(--text-color);
+/* Добавим небольшой отступ между блоками, если их несколько */
+.cargo-items-list .cargo-item-row + .cargo-item-row {
+    margin-top: 4px;
+}
+
+/* Футер */
+.footer {
+    margin-top: auto;
+    padding: 16px;
+    border-top: 1px solid var(--border-color);
     background-color: var(--background-color);
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+.footer-version {
+    font-family: monospace;
+    color: var(--text-secondary-color);
+    font-size: 14px;
+}
+
+.footer-links {
+    display: flex;
+    gap: 16px;
+}
+
+.github-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 14px;
     padding: 4px 8px;
     border-radius: 4px;
-    border: 1px solid var(--border-color);
-    cursor: default;
-    user-select: none;
+    transition: all 0.3s ease;
 }
 
-.version-info:hover {
-    opacity: 0.8;
-    transform: scale(1.05);
+.github-link:hover {
+    background-color: var(--hover-color);
+    transform: translateY(-1px);
+}
+
+.github-icon {
+    font-size: 16px;
+}
+
+/* Обеспечиваем прижатие футера к низу страницы */
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Адаптация для мобильных устройств */
 @media (max-width: 768px) {
-    .version-info {
-        font-size: 10px;
-        bottom: 5px;
-        left: 5px;
+    .footer {
+        padding: 12px 8px;
+    }
+
+    .footer-content {
+        padding: 0 8px;
+    }
+
+    .footer-version {
+        font-size: 12px;
+    }
+
+    .github-link {
+        font-size: 12px;
         padding: 3px 6px;
     }
 } 

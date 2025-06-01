@@ -2,47 +2,31 @@
   {
     "shippingDate": "2025-06-02",
     "shippingCity": "Владивосток",
-    "shipperName": "Тиминов",
+    "shipperName": "у",
     "deliveryDate": "",
     "deliveryCity": "Хабаровск",
     "receiverName": "",
-    "carrier": "Берг",
+    "carrier": "у",
     "packages": 2,
-    "description": "Какая то хуйня",
-    "id": "1748789733332",
-    "status": "pending"
-  },
-  {
-    "shippingDate": "2025-06-02",
-    "shippingCity": "Владивосток",
-    "shipperName": "Кожемякин",
-    "deliveryDate": "",
-    "deliveryCity": "Хабаровск",
-    "receiverName": "",
-    "carrier": "Берг",
-    "packages": 2,
-    "description": "Груз собран стихийно",
+    "description": "в",
     "cargoItems": [
       {
-        "description": "Коммутация",
+        "description": "2",
         "quantity": 1,
-        "destinationType": "rent_no_return",
-        "returnDate": null
+        "destinationType": "sale"
       },
       {
-        "description": "Слоны",
-        "quantity": 12,
-        "destinationType": "sale",
-        "returnDate": null
+        "description": "в",
+        "quantity": 1,
+        "destinationType": "rent_return"
       },
       {
-        "description": "Шарики",
-        "quantity": 100,
-        "destinationType": "rent_return",
-        "returnDate": "2025-06-10"
+        "description": "мммм",
+        "quantity": 1,
+        "destinationType": "service"
       }
     ],
-    "id": "1748790475764",
+    "id": "1748796108967",
     "status": "pending"
   }
 ]

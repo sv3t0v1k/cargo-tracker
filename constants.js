@@ -2,28 +2,19 @@
 const DESTINATION_TYPES = {
     SALE: {
         id: 'sale',
-        name: 'Продажа',
-        requiresReturn: false
+        name: 'Продажа'
     },
     RENT_RETURN: {
         id: 'rent_return',
-        name: 'Аренда с возвратом',
-        requiresReturn: true
+        name: 'Аренда с возвратом'
     },
     RENT_NO_RETURN: {
         id: 'rent_no_return',
-        name: 'Аренда без возврата',
-        requiresReturn: false
+        name: 'Аренда без возврата'
     },
     SERVICE: {
         id: 'service',
-        name: 'Сервисное обслуживание',
-        requiresReturn: true
-    },
-    WARRANTY: {
-        id: 'warranty',
-        name: 'Гарантийная замена',
-        requiresReturn: true
+        name: 'Сервисное обслуживание'
     }
 };
 
