@@ -173,12 +173,12 @@ body {
     transition: 
         transform var(--animation-normal) var(--easing-bounce),
         filter var(--animation-normal) var(--easing-smooth);
-    content: url('logo_dark.svg');
+    content: url('logo_dark.png');
     animation: pulse 2s infinite;
 }
 
 [data-theme="dark"] .logo {
-    content: url('logo.svg');
+    content: url('logo.png');
 }
 
 .logo:hover {
