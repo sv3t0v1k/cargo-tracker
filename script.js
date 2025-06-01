@@ -188,12 +188,14 @@ function formatCargoItems(items) {
             DESTINATION_TYPES[key].id === item.destinationType
         )];
         
-        let text = `${item.description} (${item.quantity} шт.) - ${type.name}`;
+        let text = `<div class="cargo-item-row" data-type="${item.destinationType}">`;
+        text += `${item.description} (${item.quantity} шт.) - ${type.name}`;
         if (item.returnDate) {
             text += `, возврат: ${formatDate(item.returnDate)}`;
         }
+        text += '</div>';
         return text;
-    }).join('\n');
+    }).join('');
 }
 
 function renderShipments(shipments) {
@@ -215,7 +217,6 @@ function renderShipments(shipments) {
             <td>${shipment.packages}</td>
             <td>
                 <div class="cargo-details">
-                    <div class="cargo-description">${shipment.description}</div>
                     <div class="cargo-items-list">${formatCargoItems(shipment.cargoItems)}</div>
                 </div>
             </td>
@@ -273,7 +274,6 @@ function renderShipments(shipments) {
             <div class="mobile-field description">
                 <div class="mobile-field-label">Описание</div>
                 <div class="mobile-field-value">
-                    <div class="cargo-description">${shipment.description}</div>
                     <div class="cargo-items-list">${formatCargoItems(shipment.cargoItems)}</div>
                 </div>
             </div>
@@ -575,6 +575,12 @@ function addCargoItem() {
         option.value = type.id;
         option.textContent = type.name;
         select.appendChild(option);
+    });
+    
+    // Добавляем обработчик изменения типа назначения
+    select.addEventListener('change', function() {
+        const cargoItem = this.closest('.cargo-item');
+        cargoItem.setAttribute('data-type', this.value);
     });
     
     cargoItems.appendChild(clone);

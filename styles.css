@@ -22,12 +22,25 @@
     --animation-slow: 0.6s;
     --easing-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     --easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* Цвета для светлой темы */
+    --cargo-sale-bg: #ff7676;
+    --cargo-sale-text: #000000;
+    --cargo-sale-border: #ff7676;
+    
+    --cargo-rent-return-bg: #9afc93;
+    --cargo-rent-return-text: #000000;
+    --cargo-rent-return-border: #9afc93;
+    
+    --cargo-rent-no-return-bg: #fff585;
+    --cargo-rent-no-return-text: #000000;
+    --cargo-rent-no-return-border: #fff585  ;
 }
 
 [data-theme="dark"] {
-    --primary-color: #64B5F6;
-    --secondary-color: #FFD54F;
-    --danger-color: #EF5350;
+    --primary-color: #616161;
+    --secondary-color: #616161;
+    --danger-color: #616161;
     --success-color: #81C784;
     --text-color: #E0E0E0;
     --border-color: #424242;
@@ -40,6 +53,23 @@
     --modal-overlay: rgba(0,0,0,0.75);
     --btn-text-color: white;
     --btn-secondary-text: #333;
+}
+
+/* Темная тема */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --cargo-sale-bg: #ff9696;
+        --cargo-sale-text: #000000;
+        --cargo-sale-border: #ff9696;
+        
+        --cargo-rent-return-bg: #9cff9f;
+        --cargo-rent-return-text: #000000;
+        --cargo-rent-return-border: #9cff9f;
+        
+        --cargo-rent-no-return-bg: #ffee82;
+        --cargo-rent-no-return-text: #000000;
+        --cargo-rent-no-return-border: #ffee82;
+    }
 }
 
 /* Сброс стилей */
@@ -826,71 +856,51 @@ input[list]::-webkit-calendar-picker-indicator:hover {
 }
 
 .cargo-item {
-    background: var(--background-color);
-    border: 1px solid var(--border-color);
+    position: relative;
     border-radius: 8px;
     margin-bottom: 15px;
     padding: 15px;
-    animation: slideInDown 0.3s var(--easing-bounce);
 }
 
-.cargo-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
+/* Стили для разных типов назначения */
+.cargo-item[data-type="sale"] {
+    background-color: var(--cargo-sale-bg);
+    color: var(--cargo-sale-text);
+    border: 1px solid var(--cargo-sale-border);
 }
 
-.cargo-item-header h4 {
-    margin: 0;
-    font-size: 16px;
-    color: var(--text-color);
+.cargo-item[data-type="rent_return"] {
+    background-color: var(--cargo-rent-return-bg);
+    color: var(--cargo-rent-return-text);
+    border: 1px solid var(--cargo-rent-return-border);
 }
 
-.cargo-item-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
+.cargo-item[data-type="rent_no_return"] {
+    background-color: var(--cargo-rent-no-return-bg);
+    color: var(--cargo-rent-no-return-text);
+    border: 1px solid var(--cargo-rent-no-return-border);
 }
 
-.cargo-item .form-group {
-    margin-bottom: 0;
-}
-
-/* Анимация для удаления позиции */
-.cargo-item.removing {
-    animation: slideInUp 0.3s var(--easing-bounce) reverse;
-}
-
-/* Мобильная версия для позиций груза */
-@media (max-width: 768px) {
-    .cargo-item-content {
-        grid-template-columns: 1fr;
-    }
-    
-    .cargo-item {
-        padding: 10px;
-    }
-}
-
-/* Стили для отображения позиций груза в таблице */
-.cargo-details {
-    max-width: 400px;
-}
-
-.cargo-description {
-    margin-bottom: 8px;
-    font-weight: bold;
-}
-
-.cargo-items-list {
-    font-size: 0.9em;
-    color: var(--text-secondary-color);
-    white-space: pre-line;
-}
-
-.cargo-item-list > div {
+/* Стили для отображения в таблице */
+.cargo-items-list .cargo-item-row {
+    padding: 4px 8px;
     margin-bottom: 4px;
+    border-radius: 4px;
+}
+
+.cargo-items-list .cargo-item-row[data-type="sale"] {
+    background-color: var(--cargo-sale-bg);
+    color: var(--cargo-sale-text);
+}
+
+.cargo-items-list .cargo-item-row[data-type="rent_return"] {
+    background-color: var(--cargo-rent-return-bg);
+    color: var(--cargo-rent-return-text);
+}
+
+.cargo-items-list .cargo-item-row[data-type="rent_no_return"] {
+    background-color: var(--cargo-rent-no-return-bg);
+    color: var(--cargo-rent-no-return-text);
 }
 
 /* Стили для мобильной версии */
