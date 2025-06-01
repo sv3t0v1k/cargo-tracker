@@ -41,8 +41,8 @@
             --shadow-color: rgba(0,0,0,0.3);
             --input-background: #2D2D2D;
             --modal-overlay: rgba(0,0,0,0.75);
-            --btn-text-color: #E0E0E0;
-            --btn-secondary-text: #E0E0E0;
+            --btn-text-color: #282828;
+            --btn-secondary-text: #2b2a2a;
         }
 
         * {
@@ -118,6 +118,11 @@
             max-width: 200px;
             object-fit: contain;
             transition: transform 0.3s ease;
+            content: url('logo.png'); /* Темный логотип для светлой темы */
+        }
+
+        [data-theme="dark"] .logo {
+            content: url('logo_dark.png'); /* Светлый логотип для темной темы */
         }
 
         .logo:hover {
