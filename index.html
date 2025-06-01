@@ -7,751 +7,12 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Система учета грузов</title>
-    <style>
-        /* CSS Version: 2.0 - Mobile Fix */
-        :root {
-            --primary-color: #2196F3;
-            --secondary-color: #FFC107;
-            --danger-color: #F44336;
-            --success-color: #4CAF50;
-            --text-color: #333;
-            --border-color: #ddd;
-            --background-color: #f5f5f5;
-            --card-background: white;
-            --table-hover: #f8f9fa;
-            --table-header: #f8f9fa;
-            --shadow-color: rgba(0,0,0,0.1);
-            --input-background: white;
-            --modal-overlay: rgba(0,0,0,0.5);
-            --btn-text-color: white;
-            --btn-secondary-text: #333;
-        }
-
-        [data-theme="dark"] {
-            --primary-color: #64B5F6;
-            --secondary-color: #FFD54F;
-            --danger-color: #EF5350;
-            --success-color: #81C784;
-            --text-color: #E0E0E0;
-            --border-color: #424242;
-            --background-color: #121212;
-            --card-background: #1E1E1E;
-            --table-hover: #2D2D2D;
-            --table-header: #2D2D2D;
-            --shadow-color: rgba(0,0,0,0.3);
-            --input-background: #2D2D2D;
-            --modal-overlay: rgba(0,0,0,0.75);
-            --btn-text-color: #282828;
-            --btn-secondary-text: #2b2a2a;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background: var(--background-color);
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease;
-        }
-
-        .container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .content-wrapper {
-            background: var(--card-background);
-            border-radius: 8px;
-            box-shadow: 0 2px 4px var(--shadow-color);
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            margin: 0 auto;
-            width: 100%;
-            max-width: 1800px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            border-bottom: 1px solid var(--border-color);
-            gap: 10px;
-            flex-shrink: 0;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            margin: 0;
-        }
-
-        .header-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-        }
-
-        .logo {
-            height: 50px;
-            width: auto;
-            max-width: 200px;
-            object-fit: contain;
-            transition: transform 0.3s ease;
-            content: url('logo.png'); /* Темный логотип для светлой темы */
-        }
-
-        [data-theme="dark"] .logo {
-            content: url('logo_dark.png'); /* Светлый логотип для темной темы */
-        }
-
-        .logo:hover {
-            transform: scale(1.05);
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: var(--btn-text-color);
-        }
-
-        .btn-secondary {
-            background: var(--secondary-color);
-            color: var(--btn-secondary-text);
-        }
-
-        .btn-danger {
-            background: var(--danger-color);
-            color: var(--btn-text-color);
-        }
-
-        .search-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .search-bar input {
-            flex: 1;
-            min-width: 200px;
-            padding: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-        }
-
-        .table-container {
-            flex: 1;
-            overflow: auto;
-            padding: 0 15px;
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 0;
-            table-layout: auto;
-        }
-
-        thead {
-            position: sticky;
-            top: 0;
-            z-index: 1;
-            background: var(--card-background);
-        }
-
-        th {
-            background: var(--table-header);
-            color: var(--text-color);
-            font-weight: 600;
-            white-space: nowrap;
-            padding: 12px;
-            text-align: left;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border-color);
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            vertical-align: top;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* Колонки с оптимизированной шириной */
-        th:nth-child(1), td:nth-child(1) { width: 120px; } /* Дата отправки */
-        th:nth-child(2), td:nth-child(2) { width: 150px; } /* Город отправления */
-        th:nth-child(3), td:nth-child(3) { width: 180px; } /* Отправитель */
-        th:nth-child(4), td:nth-child(4) { width: 120px; } /* Дата получения */
-        th:nth-child(5), td:nth-child(5) { width: 150px; } /* Город получения */
-        th:nth-child(6), td:nth-child(6) { width: 180px; } /* Получатель */
-        th:nth-child(7), td:nth-child(7) { width: 140px; } /* Перевозчик */
-        th:nth-child(8), td:nth-child(8) { width: 80px; }  /* Мест */
-        th:nth-child(10), td:nth-child(10) { width: 100px; } /* Статус */
-        th:nth-child(11), td:nth-child(11) { width: 140px; } /* Действия */
-
-        /* Описание - гибкая ширина */
-        th:nth-child(9), td:nth-child(9) {
-            width: auto;
-            min-width: 250px;
-            max-width: 400px;
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--modal-overlay);
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: var(--card-background);
-            padding: 20px;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 4px 6px var(--shadow-color);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .close {
-            cursor: pointer;
-            font-size: 24px;
-            padding: 5px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 14px;
-            background: var(--input-background);
-            color: var(--text-color);
-        }
-
-        .form-group textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-
-        .status-pending {
-            color: var(--secondary-color);
-            font-weight: 500;
-        }
-
-        .status-delivered {
-            color: var(--success-color);
-            font-weight: 500;
-        }
-
-        .actions {
-            display: flex;
-            gap: 5px;
-            flex-wrap: nowrap;
-        }
-
-        .filter-bar {
-            padding: 15px;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--card-background);
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            flex-shrink: 0;
-        }
-
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .filter-group label {
-            white-space: nowrap;
-            font-weight: 500;
-        }
-
-        .filter-group input,
-        .filter-group select {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 14px;
-            background: var(--input-background);
-            color: var(--text-color);
-        }
-
-        .filter-group input:focus,
-        .filter-group select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
-        }
-
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 4px;
-            background: var(--success-color);
-            color: white;
-            display: none;
-            animation: slideIn 0.3s ease-out;
-            z-index: 1000;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                overflow: auto;
-            }
-            
-            .container {
-                padding: 10px;
-                height: auto;
-                min-height: 100vh;
-                overflow: visible;
-            }
-
-            .content-wrapper {
-                border-radius: 0;
-                box-shadow: none;
-                height: auto;
-                overflow: visible;
-            }
-
-            .header {
-                flex-direction: column;
-                padding: 15px;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .header h1 {
-                font-size: 22px;
-                width: 100%;
-            }
-
-            .header-controls {
-                flex-direction: column;
-                gap: 10px;
-                width: 100%;
-            }
-
-            .header-controls button {
-                width: 100%;
-                padding: 12px;
-            }
-
-            .filter-group {
-                flex-direction: column;
-                gap: 5px;
-            }
-
-            .filter-group label {
-                font-weight: 500;
-            }
-
-            .filter-group input,
-            .filter-group select {
-                width: 100%;
-                padding: 12px;
-                font-size: 16px;
-            }
-
-            .table-container {
-                padding: 0;
-                overflow: visible;
-            }
-
-            /* Кнопка для показа фильтров */
-            .mobile-filter-toggle {
-                display: block !important;
-                padding: 15px;
-                text-align: center;
-                border-bottom: 1px solid var(--border-color);
-            }
-
-            .mobile-filter-toggle button {
-                width: 100%;
-                padding: 12px;
-                font-size: 16px;
-                border-radius: 8px;
-                background: var(--secondary-color);
-                color: var(--btn-secondary-text);
-                border: none;
-                cursor: pointer;
-                transition: all 0.3s ease;
-            }
-
-            .mobile-filter-toggle button:hover {
-                opacity: 0.9;
-                transform: translateY(-1px);
-            }
-
-            /* Скрываем фильтры по умолчанию */
-            .filter-bar {
-                display: none;
-            }
-
-            .filter-bar.show {
-                display: block;
-                padding: 15px;
-                flex-direction: column;
-                gap: 15px;
-                border-bottom: 1px solid var(--border-color);
-                background: var(--background-color);
-            }
-
-            /* Скрываем таблицу на мобильных */
-            .desktop-table {
-                display: none;
-            }
-
-            /* Показываем мобильные карточки */
-            .mobile-cards {
-                display: block !important;
-                padding: 15px;
-            }
-
-            /* Стили для мобильных карточек */
-            .mobile-card {
-                background: var(--card-background);
-                border: 1px solid var(--border-color);
-                border-radius: 12px;
-                margin-bottom: 20px;
-                padding: 0;
-                box-shadow: 0 2px 8px var(--shadow-color);
-                overflow: hidden;
-            }
-
-            .mobile-field {
-                display: flex;
-                padding: 12px 16px;
-                border-bottom: 1px solid var(--border-color);
-                align-items: flex-start;
-                min-height: 50px;
-            }
-
-            .mobile-field:last-child {
-                border-bottom: none;
-            }
-
-            .mobile-field-label {
-                font-weight: 600;
-                color: var(--text-color);
-                min-width: 120px;
-                flex-shrink: 0;
-                padding-right: 12px;
-                font-size: 14px;
-            }
-
-            .mobile-field-value {
-                flex: 1;
-                word-break: break-word;
-                line-height: 1.4;
-                font-size: 14px;
-            }
-
-            /* Специальная обработка для описания */
-            .mobile-field.description {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .mobile-field.description .mobile-field-label {
-                margin-bottom: 8px;
-                min-width: auto;
-            }
-
-            .mobile-field.description .mobile-field-value {
-                background: var(--background-color);
-                padding: 12px;
-                border-radius: 6px;
-                white-space: pre-wrap;
-                word-break: break-word;
-            }
-
-            /* Кнопки действий */
-            .mobile-field.actions {
-                justify-content: center;
-                gap: 12px;
-                padding: 16px;
-            }
-
-            .mobile-field.actions .mobile-field-label {
-                display: none;
-            }
-
-            .mobile-actions {
-                display: flex;
-                gap: 12px;
-                width: 100%;
-            }
-
-            .mobile-actions button {
-                flex: 1;
-                padding: 10px 16px;
-                min-width: 80px;
-                border-radius: 6px;
-                font-size: 14px;
-            }
-
-            /* Статусы */
-            .mobile-status {
-                display: inline-block;
-                padding: 6px 12px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-            }
-
-            .mobile-status.pending {
-                background: rgba(255, 193, 7, 0.2);
-                color: #FF8F00;
-                border: 1px solid #FF8F00;
-            }
-
-            .mobile-status.delivered {
-                background: rgba(76, 175, 80, 0.2);
-                color: #2E7D32;
-                border: 1px solid #2E7D32;
-            }
-
-            /* Модальные окна */
-            .modal-content {
-                margin: 20px;
-                padding: 20px;
-                max-height: calc(100vh - 40px);
-                border-radius: 12px;
-            }
-
-            .form-group {
-                margin-bottom: 20px;
-            }
-
-            .form-group label {
-                display: block;
-                margin-bottom: 8px;
-                font-weight: 500;
-                font-size: 16px;
-            }
-
-            .form-group input,
-            .form-group select,
-            .form-group textarea {
-                width: 100%;
-                padding: 12px;
-                font-size: 16px;
-                border: 1px solid var(--border-color);
-                border-radius: 8px;
-                background: var(--input-background);
-                color: var(--text-color);
-            }
-
-            .form-group textarea {
-                min-height: 100px;
-                resize: vertical;
-            }
-
-            /* Уведомления */
-            .notification {
-                left: 20px;
-                right: 20px;
-                bottom: 20px;
-                padding: 16px;
-                font-size: 16px;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px var(--shadow-color);
-            }
-        }
-
-        .theme-switch {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-left: auto;
-            margin-right: 16px;
-        }
-
-        .theme-switch-button {
-            color: var(--text-color);
-            background: transparent;
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .theme-switch-button:hover {
-            transform: scale(1.1);
-            border-color: var(--primary-color);
-        }
-
-        /* Стили для скроллбара */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--background-color);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-color);
-        }
-
-        /* Стили для выделения текста */
-        ::selection {
-            background: var(--primary-color);
-            color: var(--btn-text-color);
-        }
-
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        @media (max-width: 768px) {
-            .header-controls {
-                flex-direction: column;
-                width: 100%;
-            }
-        }
-
-        .shipment-row {
-            background: var(--card-background);
-        }
-
-        /* Скрываем кнопку фильтров на десктопе */
-        .mobile-filter-toggle {
-            display: none;
-        }
-
-        /* МОБИЛЬНАЯ ВЕРСИЯ - ОТДЕЛЬНАЯ СТРУКТУРА */
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 22px;
-                width: 100%;
-            }
-
-            .header-logo {
-                order: -1;
-                margin-bottom: 10px;
-            }
-
-            .logo {
-                height: 45px;
-                max-width: 150px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <div class="content-wrapper">
+            <!-- Шапка сайта -->
             <div class="header">
                 <h1>Система учета грузов</h1>
                 <div class="header-logo">
@@ -770,12 +31,14 @@
                 </div>
             </div>
 
-            <div class="mobile-filter-toggle" style="display: none;">
-                <button class="btn btn-secondary" onclick="toggleMobileFilters()" id="mobileFilterButton">
+            <!-- Кнопка для мобильных фильтров -->
+            <div class="mobile-filter-toggle">
+                <button onclick="toggleMobileFilters()" id="mobileFilterButton">
                     <span>🔍</span> Показать фильтры
                 </button>
             </div>
 
+            <!-- Панель фильтров -->
             <div class="filter-bar" id="filterBar">
                 <div class="filter-group">
                     <label>Дата с:</label>
@@ -788,41 +51,49 @@
                 <div class="filter-group">
                     <label>Статус:</label>
                     <select id="statusFilter" onchange="filterShipments()">
-                        <option value="" selected>Все</option>
+                        <option value="">Все</option>
                         <option value="pending">В пути</option>
                         <option value="delivered">Доставлен</option>
                     </select>
+                </div>
+                <div class="filter-group">
+                    <label>Город:</label>
+                    <input type="text" id="cityFilter" list="cities" placeholder="Все города" oninput="filterShipments()">
                 </div>
                 <div class="filter-group">
                     <input type="text" id="searchInput" placeholder="Поиск..." oninput="filterShipments()">
                 </div>
             </div>
 
+            <!-- Контейнер с данными -->
             <div class="table-container">
+                <!-- Десктопная таблица -->
                 <table id="shipmentsTable" class="desktop-table">
                     <thead>
                         <tr>
-                            <th style="width: 100px;">Дата отправки</th>
-                            <th style="width: 120px;">Город отправления</th>
-                            <th style="width: 150px;">Отправитель</th>
-                            <th style="width: 100px;">Дата получения</th>
-                            <th style="width: 120px;">Город получения</th>
-                            <th style="width: 150px;">Получатель</th>
-                            <th style="width: 120px;">Перевозчик</th>
-                            <th style="width: 80px;">Мест</th>
+                            <th>Дата отправки</th>
+                            <th>Город отправления</th>
+                            <th>Отправитель</th>
+                            <th>Дата получения</th>
+                            <th>Город получения</th>
+                            <th>Получатель</th>
+                            <th>Перевозчик</th>
+                            <th>Мест</th>
                             <th>Описание</th>
-                            <th style="width: 100px;">Статус</th>
-                            <th style="width: 100px;"></th>
+                            <th>Статус</th>
+                            <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
                 
-                <div id="mobileCards" class="mobile-cards" style="display: none;"></div>
+                <!-- Мобильные карточки -->
+                <div id="mobileCards" class="mobile-cards"></div>
             </div>
         </div>
     </div>
 
+    <!-- Модальное окно для создания/редактирования отправки -->
     <div id="shipmentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -831,506 +102,67 @@
             </div>
             <form id="shipmentForm" onsubmit="saveShipment(event)">
                 <input type="hidden" id="shipmentId">
+                
                 <div class="form-group">
                     <label>Дата отправки</label>
                     <input type="date" id="shippingDate" required>
                 </div>
+                
                 <div class="form-group">
                     <label>Город отправления</label>
-                    <input type="text" id="shippingCity" required>
+                    <input type="text" id="shippingCity" list="cities" required>
+                    <datalist id="cities">
+                        <option value="Владивосток">
+                        <option value="Хабаровск">
+                        <option value="Южно-Сахалинск">
+                        <option value="Благовещенск">
+                    </datalist>
                 </div>
+                
                 <div class="form-group">
                     <label>ФИО отправителя</label>
                     <input type="text" id="shipperName" required>
                 </div>
+                
                 <div class="form-group">
                     <label>Дата получения</label>
                     <input type="date" id="deliveryDate">
                 </div>
+                
                 <div class="form-group">
                     <label>Город получения</label>
-                    <input type="text" id="deliveryCity">
+                    <input type="text" id="deliveryCity" list="cities">
                 </div>
+                
                 <div class="form-group">
                     <label>ФИО получателя</label>
                     <input type="text" id="receiverName">
                 </div>
+                
                 <div class="form-group">
                     <label>Перевозчик</label>
                     <input type="text" id="carrier" required>
                 </div>
+                
                 <div class="form-group">
                     <label>Количество мест</label>
                     <input type="number" id="packages" required min="1">
                 </div>
+                
                 <div class="form-group">
                     <label>Описание груза</label>
                     <textarea id="description" required></textarea>
                 </div>
+                
                 <button type="submit" class="btn btn-primary">Сохранить</button>
             </form>
         </div>
     </div>
 
+    <!-- Уведомления -->
     <div id="notification" class="notification"></div>
 
-    <script>
-        // Модель данных
-        class ShipmentStore {
-            constructor() {
-                this.shipments = [];
-                this.loadShipments();
-            }
-
-            async loadShipments() {
-                try {
-                    const response = await fetch('/api/shipments');
-                    if (!response.ok) throw new Error('Ошибка загрузки данных');
-                    this.shipments = await response.json();
-                    // Применяем текущие фильтры
-                    filterShipments();
-                } catch (error) {
-                    console.error('Ошибка загрузки:', error);
-                    showNotification('Ошибка при загрузке данных', 'error');
-                }
-            }
-
-            async saveShipments() {
-                try {
-                    const response = await fetch('/api/shipments', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(this.shipments)
-                    });
-                    if (!response.ok) throw new Error('Ошибка сохранения данных');
-                } catch (error) {
-                    showNotification('Ошибка при сохранении данных', 'error');
-                }
-            }
-
-            async addShipment(shipment) {
-                shipment.id = Date.now().toString();
-                shipment.status = shipment.deliveryDate ? 'delivered' : 'pending';
-                this.shipments.push(shipment);
-                await this.saveShipments();
-                return shipment;
-            }
-
-            async updateShipment(id, updatedShipment) {
-                const index = this.shipments.findIndex(s => s.id === id);
-                if (index !== -1) {
-                    updatedShipment.status = updatedShipment.deliveryDate ? 'delivered' : 'pending';
-                    this.shipments[index] = { ...this.shipments[index], ...updatedShipment };
-                    await this.saveShipments();
-                    return true;
-                }
-                return false;
-            }
-
-            async deleteShipment(id) {
-                const index = this.shipments.findIndex(s => s.id === id);
-                if (index !== -1) {
-                    this.shipments.splice(index, 1);
-                    await this.saveShipments();
-                    return true;
-                }
-                return false;
-            }
-
-            async clearAllShipments() {
-                try {
-                    const response = await fetch('/api/shipments', {
-                        method: 'DELETE'
-                    });
-                    if (!response.ok) throw new Error('Ошибка очистки данных');
-                    this.shipments = [];
-                    return true;
-                } catch (error) {
-                    showNotification('Ошибка при очистке данных', 'error');
-                    return false;
-                }
-            }
-
-            getShipments() {
-                return this.shipments;
-            }
-        }
-
-        // Контроллер
-        const store = new ShipmentStore();
-        let currentFilters = {
-            dateFrom: '',
-            dateTo: '',
-            status: '',
-            search: ''
-        };
-
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            
-            // Проверяем, если это уже отформатированная дата
-            if (typeof dateString === 'string' && dateString.includes('.')) {
-                return dateString;
-            }
-            
-            let date;
-            
-            // Пробуем разные форматы
-            if (typeof dateString === 'string') {
-                // Если формат DD.MM.YYYY
-                if (dateString.includes('.')) {
-                    const parts = dateString.split('.');
-                    if (parts.length === 3) {
-                        // Создаем дату в формате YYYY-MM-DD
-                        date = new Date(`${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`);
-                    }
-                } else {
-                    // Стандартный формат ISO
-                    date = new Date(dateString);
-                }
-            } else {
-                date = new Date(dateString);
-            }
-            
-            // Проверяем, валидна ли дата
-            if (isNaN(date.getTime())) {
-                console.warn('Invalid date format:', dateString);
-                return dateString || ''; // Возвращаем исходную строку если не можем распарсить
-            }
-            
-            return date.toLocaleDateString('ru-RU');
-        }
-
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.style.display = 'block';
-            notification.style.background = type === 'error' ? 
-                getComputedStyle(document.documentElement).getPropertyValue('--danger-color') : 
-                getComputedStyle(document.documentElement).getPropertyValue('--success-color');
-            
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-
-        function renderShipments(shipments) {
-            // Рендеринг для десктопа
-            const tbody = document.querySelector('#shipmentsTable tbody');
-            tbody.innerHTML = '';
-
-            shipments.forEach(shipment => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td data-label="Дата отправки"><span>${formatDate(shipment.shippingDate)}</span></td>
-                    <td data-label="Город отправления"><span>${shipment.shippingCity}</span></td>
-                    <td data-label="Отправитель"><span>${shipment.shipperName}</span></td>
-                    <td data-label="Дата получения"><span>${formatDate(shipment.deliveryDate)}</span></td>
-                    <td data-label="Город получения"><span>${shipment.deliveryCity || ''}</span></td>
-                    <td data-label="Получатель"><span>${shipment.receiverName || ''}</span></td>
-                    <td data-label="Перевозчик"><span>${shipment.carrier}</span></td>
-                    <td data-label="Мест"><span>${shipment.packages}</span></td>
-                    <td data-label="Описание"><span>${shipment.description}</span></td>
-                    <td data-label="Статус"><span class="status-${shipment.status}">${shipment.status === 'delivered' ? 'Доставлен' : 'В пути'}</span></td>
-                    <td class="actions">
-                        <button class="btn btn-secondary" onclick="editShipment('${shipment.id}')">✏️</button>
-                        <button class="btn btn-danger" onclick="deleteShipment('${shipment.id}')">🗑️</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            // Рендеринг для мобильных устройств
-            const mobileCards = document.getElementById('mobileCards');
-            mobileCards.innerHTML = '';
-
-            shipments.forEach(shipment => {
-                const card = document.createElement('div');
-                card.className = 'mobile-card';
-                
-                const statusClass = shipment.status === 'delivered' ? 'delivered' : 'pending';
-                const statusText = shipment.status === 'delivered' ? 'Доставлен' : 'В пути';
-                
-                card.innerHTML = `
-                    <div class="mobile-field">
-                        <div class="mobile-field-label">Дата отправки:</div>
-                        <div class="mobile-field-value">${formatDate(shipment.shippingDate)}</div>
-                    </div>
-                    <div class="mobile-field">
-                        <div class="mobile-field-label">Город отправления:</div>
-                        <div class="mobile-field-value">${shipment.shippingCity}</div>
-                    </div>
-                    <div class="mobile-field">
-                        <div class="mobile-field-label">Отправитель:</div>
-                        <div class="mobile-field-value">${shipment.shipperName}</div>
-                    </div>
-                    <div class="mobile-field">
-                        <div class="mobile-field-label">Дата получения:</div>
-                        <div class="mobile-field-value">${formatDate(shipment.deliveryDate)}</div>
-                    </div>
-                    <div class="mobile-field">
-                        <div class="mobile-field-label">Город получения:</div>
-                        <div class="mobile-field-value">${shipment.deliveryCity || ''}</div>
-                    </div>
-                    <div class="mobile-field">
-                        <div class="mobile-field-label">Получатель:</div>
-                        <div class="mobile-field-value">${shipment.receiverName || ''}</div>
-                    </div>
-                    <div class="mobile-field">
-                        <div class="mobile-field-label">Перевозчик:</div>
-                        <div class="mobile-field-value">${shipment.carrier}</div>
-                    </div>
-                    <div class="mobile-field">
-                        <div class="mobile-field-label">Мест:</div>
-                        <div class="mobile-field-value">${shipment.packages}</div>
-                    </div>
-                    <div class="mobile-field description">
-                        <div class="mobile-field-label">Описание:</div>
-                        <div class="mobile-field-value">${shipment.description}</div>
-                    </div>
-                    <div class="mobile-field">
-                        <div class="mobile-field-label">Статус:</div>
-                        <div class="mobile-field-value">
-                            <span class="mobile-status ${statusClass}">${statusText}</span>
-                        </div>
-                    </div>
-                    <div class="mobile-field actions">
-                        <div class="mobile-actions">
-                            <button class="btn btn-secondary" onclick="editShipment('${shipment.id}')">✏️ Изменить</button>
-                            <button class="btn btn-danger" onclick="deleteShipment('${shipment.id}')">🗑️ Удалить</button>
-                        </div>
-                    </div>
-                `;
-                mobileCards.appendChild(card);
-            });
-        }
-
-        function filterShipments() {
-            currentFilters = {
-                dateFrom: document.getElementById('dateFrom').value,
-                dateTo: document.getElementById('dateTo').value,
-                status: document.getElementById('statusFilter').value,
-                search: document.getElementById('searchInput').value.toLowerCase()
-            };
-
-            let filtered = store.getShipments();
-
-            if (currentFilters.dateFrom) {
-                filtered = filtered.filter(s => s.shippingDate >= currentFilters.dateFrom);
-            }
-            if (currentFilters.dateTo) {
-                filtered = filtered.filter(s => s.shippingDate <= currentFilters.dateTo);
-            }
-            if (currentFilters.status) {
-                filtered = filtered.filter(s => s.status === currentFilters.status);
-            }
-            if (currentFilters.search) {
-                filtered = filtered.filter(s => 
-                    s.shippingCity.toLowerCase().includes(currentFilters.search) ||
-                    s.deliveryCity?.toLowerCase().includes(currentFilters.search) ||
-                    s.shipperName.toLowerCase().includes(currentFilters.search) ||
-                    s.receiverName?.toLowerCase().includes(currentFilters.search) ||
-                    s.carrier.toLowerCase().includes(currentFilters.search) ||
-                    s.description.toLowerCase().includes(currentFilters.search)
-                );
-            }
-
-            renderShipments(filtered);
-        }
-
-        function openNewShipmentModal() {
-            document.getElementById('modalTitle').textContent = 'Новая отправка';
-            document.getElementById('shipmentForm').reset();
-            document.getElementById('shipmentId').value = '';
-            document.getElementById('shipmentModal').style.display = 'flex';
-        }
-
-        function editShipment(id) {
-            const shipment = store.getShipments().find(s => s.id === id);
-            if (shipment) {
-                document.getElementById('modalTitle').textContent = 'Редактировать отправку';
-                document.getElementById('shipmentId').value = id;
-                
-                // Преобразуем даты в формат YYYY-MM-DD для input[type="date"]
-                document.getElementById('shippingDate').value = convertToInputDate(shipment.shippingDate);
-                document.getElementById('shippingCity').value = shipment.shippingCity;
-                document.getElementById('shipperName').value = shipment.shipperName;
-                document.getElementById('deliveryDate').value = convertToInputDate(shipment.deliveryDate);
-                document.getElementById('deliveryCity').value = shipment.deliveryCity || '';
-                document.getElementById('receiverName').value = shipment.receiverName || '';
-                document.getElementById('carrier').value = shipment.carrier;
-                document.getElementById('packages').value = shipment.packages;
-                document.getElementById('description').value = shipment.description;
-                document.getElementById('shipmentModal').style.display = 'flex';
-            }
-        }
-
-        // Функция для преобразования даты в формат для input[type="date"]
-        function convertToInputDate(dateString) {
-            if (!dateString) return '';
-            
-            // Если уже в формате YYYY-MM-DD
-            if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
-                return dateString;
-            }
-            
-            // Если в формате DD.MM.YYYY
-            if (dateString.includes('.')) {
-                const parts = dateString.split('.');
-                if (parts.length === 3) {
-                    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-                }
-            }
-            
-            // Пробуем создать дату и преобразовать
-            const date = new Date(dateString);
-            if (!isNaN(date.getTime())) {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            }
-            
-            return '';
-        }
-
-        function closeModal() {
-            document.getElementById('shipmentModal').style.display = 'none';
-        }
-
-        async function saveShipment(event) {
-            event.preventDefault();
-            
-            const shipment = {
-                shippingDate: document.getElementById('shippingDate').value,
-                shippingCity: document.getElementById('shippingCity').value,
-                shipperName: document.getElementById('shipperName').value,
-                deliveryDate: document.getElementById('deliveryDate').value,
-                deliveryCity: document.getElementById('deliveryCity').value,
-                receiverName: document.getElementById('receiverName').value,
-                carrier: document.getElementById('carrier').value,
-                packages: document.getElementById('packages').value,
-                description: document.getElementById('description').value
-            };
-
-            const id = document.getElementById('shipmentId').value;
-            
-            try {
-                if (id) {
-                    await store.updateShipment(id, shipment);
-                    showNotification('Отправка обновлена');
-                } else {
-                    await store.addShipment(shipment);
-                    showNotification('Отправка добавлена');
-                }
-                closeModal();
-                filterShipments();
-            } catch (error) {
-                showNotification('Ошибка при сохранении', 'error');
-            }
-        }
-
-        async function deleteShipment(id) {
-            if (confirm('Вы уверены, что хотите удалить эту отправку?')) {
-                try {
-                    await store.deleteShipment(id);
-                    showNotification('Отправка удалена');
-                    filterShipments();
-                } catch (error) {
-                    showNotification('Ошибка при удалении', 'error');
-                }
-            }
-        }
-
-        async function clearAllData() {
-            if (confirm('Вы уверены, что хотите удалить ВСЕ данные? Это действие необратимо!')) {
-                try {
-                    const success = await store.clearAllShipments();
-                    if (success) {
-                        showNotification('Все данные очищены');
-                        filterShipments();
-                    }
-                } catch (error) {
-                    showNotification('Ошибка при очистке данных', 'error');
-                }
-            }
-        }
-
-        // Функция переключения темы
-        function toggleTheme() {
-            const body = document.documentElement;
-            const themeButton = document.getElementById('themeButton');
-            const currentTheme = body.getAttribute('data-theme');
-            
-            if (currentTheme === 'dark') {
-                body.removeAttribute('data-theme');
-                themeButton.textContent = '🌞';
-                localStorage.setItem('theme', 'light');
-            } else {
-                body.setAttribute('data-theme', 'dark');
-                themeButton.textContent = '🌙';
-                localStorage.setItem('theme', 'dark');
-            }
-        }
-
-        // Функция переключения мобильных фильтров
-        function toggleMobileFilters() {
-            const filterBar = document.getElementById('filterBar');
-            const button = document.getElementById('mobileFilterButton');
-            
-            if (filterBar.classList.contains('show')) {
-                filterBar.classList.remove('show');
-                button.innerHTML = '<span>🔍</span> Показать фильтры';
-            } else {
-                filterBar.classList.add('show');
-                button.innerHTML = '<span>🔍</span> Скрыть фильтры';
-            }
-        }
-
-        // Инициализация темы при загрузке
-        document.addEventListener('DOMContentLoaded', () => {
-            store.loadShipments();
-            
-            // Восстановление сохраненной темы
-            const savedTheme = localStorage.getItem('theme');
-            const themeButton = document.getElementById('themeButton');
-            
-            if (savedTheme === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                themeButton.textContent = '🌙';
-            }
-
-            // Устанавливаем фильтр по умолчанию - последняя неделя
-            const today = new Date();
-            const weekAgo = new Date(today);
-            weekAgo.setDate(today.getDate() - 7);
-            
-            // Форматируем даты для input[type="date"]
-            const todayStr = today.toISOString().split('T')[0];
-            const weekAgoStr = weekAgo.toISOString().split('T')[0];
-            
-            // Устанавливаем значения в фильтрах
-            document.getElementById('dateFrom').value = weekAgoStr;
-            document.getElementById('dateTo').value = todayStr;
-            
-            // Обновляем currentFilters
-            currentFilters.dateFrom = weekAgoStr;
-            currentFilters.dateTo = todayStr;
-            currentFilters.status = ''; // Показываем все статусы
-            
-            // Обновляем значение в селекте статуса
-            document.getElementById('statusFilter').value = '';
-        });
-
-        // Закрытие модального окна при клике вне его
-        window.onclick = function(event) {
-            const modal = document.getElementById('shipmentModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        }
-    </script>
+    <!-- Подключение JavaScript -->
+    <script src="script.js"></script>
 </body>
 </html>

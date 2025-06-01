@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "id": "1",
+    "shippingDate": "2024-05-25",
+    "shippingCity": "Владивосток",
+    "shipperName": "Тестовый отправитель",
+    "deliveryDate": "2024-05-30",
+    "deliveryCity": "Хабаровск",
+    "receiverName": "Тестовый получатель",
+    "carrier": "Тестовая ТК",
+    "packages": 3,
+    "description": "Тестовый груз",
+    "status": "delivered"
+  }
+]
