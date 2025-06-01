@@ -36,42 +36,65 @@ class ShipmentStore {
     }
 
     async addShipment(shipment) {
-        shipment.id = Date.now().toString();
-        shipment.status = shipment.deliveryDate ? 'delivered' : 'pending';
-        this.shipments.push(shipment);
-        await this.saveShipments();
-        return shipment;
+        try {
+            const response = await fetch('/api/shipments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(shipment)
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Ошибка при сохранении');
+            }
+            
+            await this.loadShipments();
+            return true;
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification(error.message || 'Ошибка при сохранении груза', 'error');
+            return false;
+        }
     }
 
     async updateShipment(id, updatedShipment) {
-        const index = this.shipments.findIndex(s => s.id === id);
-        if (index !== -1) {
-            updatedShipment.status = updatedShipment.deliveryDate ? 'delivered' : 'pending';
-            this.shipments[index] = { ...this.shipments[index], ...updatedShipment };
-            await this.saveShipments();
+        try {
+            const response = await fetch(`/api/shipments/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedShipment)
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Ошибка при обновлении');
+            }
+            
+            await this.loadShipments();
             return true;
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification(error.message || 'Ошибка при обновлении груза', 'error');
+            return false;
         }
-        return false;
     }
 
     async deleteShipment(id) {
-        if (confirm('Вы уверены, что хотите удалить эту отправку?')) {
-            try {
-                const response = await fetch(`/api/shipments/${id}`, {
-                    method: 'DELETE'
-                });
+        try {
+            const response = await fetch(`/api/shipments/${id}`, {
+                method: 'DELETE'
+            });
 
-                if (!response.ok) {
-                    throw new Error('Ошибка при удалении');
-                }
-
-                showNotification('Отправка успешно удалена', 'success');
-                await this.loadShipments();
-                filterShipments();
-            } catch (error) {
-                console.error('Error:', error);
-                showNotification('Ошибка при удалении отправки', 'error');
+            if (!response.ok) {
+                throw new Error('Ошибка при удалении');
             }
+
+            await this.loadShipments();
+            return true;
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('Ошибка при удалении отправки', 'error');
+            return false;
         }
     }
 
@@ -184,15 +207,16 @@ function formatCargoItems(items) {
     if (!items || !Array.isArray(items)) return '';
     
     return items.map(item => {
-        const type = DESTINATION_TYPES[Object.keys(DESTINATION_TYPES).find(key => 
+        // Проверяем существование типа
+        const typeKey = Object.keys(DESTINATION_TYPES).find(key => 
             DESTINATION_TYPES[key].id === item.destinationType
-        )];
+        );
         
-        let text = `<div class="cargo-item-row" data-type="${item.destinationType}">`;
+        // Если тип не найден, используем тип "Продажа" по умолчанию
+        const type = typeKey ? DESTINATION_TYPES[typeKey] : DESTINATION_TYPES.SALE;
+        
+        let text = `<div class="cargo-item-row" data-type="${type.id}">`;
         text += `${item.description} (${item.quantity} шт.) - ${type.name}`;
-        if (item.returnDate) {
-            text += `, возврат: ${formatDate(item.returnDate)}`;
-        }
         text += '</div>';
         return text;
     }).join('');
@@ -390,12 +414,6 @@ function openEditModal(shipment = null) {
                 lastItem.querySelector('.cargo-description').value = item.description;
                 lastItem.querySelector('.cargo-quantity').value = item.quantity;
                 lastItem.querySelector('.cargo-destination-type').value = item.destinationType;
-                if (item.returnDate) {
-                    const returnDateGroup = lastItem.querySelector('.return-date-group');
-                    const returnDateInput = lastItem.querySelector('.cargo-return-date');
-                    returnDateGroup.style.display = 'block';
-                    returnDateInput.value = convertToInputDate(item.returnDate);
-                }
                 handleDestinationTypeChange(lastItem.querySelector('.cargo-destination-type'));
             });
         }
@@ -421,7 +439,6 @@ async function saveShipment(event) {
     event.preventDefault();
     
     try {
-        // Собираем данные формы
         const shipment = {
             shippingDate: document.getElementById('shippingDate').value,
             shippingCity: document.getElementById('shippingCity').value,
@@ -448,23 +465,18 @@ async function saveShipment(event) {
             throw new Error('Добавьте хотя бы одну позицию груза');
         }
 
-        // Отправляем запрос на сервер
-        const response = await fetch('/api/shipments', {
-            method: currentShipmentId ? 'PUT' : 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(shipment)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Ошибка при сохранении');
+        let success;
+        if (currentShipmentId) {
+            success = await store.updateShipment(currentShipmentId, shipment);
+        } else {
+            success = await store.addShipment(shipment);
         }
 
-        // Если всё успешно
-        showNotification('Груз успешно сохранен', 'success');
-        closeModal();
-        await store.loadShipments(); // Ждём загрузки данных
-        filterShipments(); // Обновляем отображение с учётом фильтров
+        if (success) {
+            showNotification('Груз успешно сохранен', 'success');
+            closeModal();
+            filterShipments();
+        }
     } catch (error) {
         console.error('Error:', error);
         showNotification(error.message || 'Ошибка при сохранении груза', 'error');
@@ -577,12 +589,6 @@ function addCargoItem() {
         select.appendChild(option);
     });
     
-    // Добавляем обработчик изменения типа назначения
-    select.addEventListener('change', function() {
-        const cargoItem = this.closest('.cargo-item');
-        cargoItem.setAttribute('data-type', this.value);
-    });
-    
     cargoItems.appendChild(clone);
 }
 
@@ -593,22 +599,8 @@ function removeCargoItem(button) {
 }
 
 function handleDestinationTypeChange(select) {
-    const cargoItem = select.closest('.cargo-item');
-    const returnDateGroup = cargoItem.querySelector('.return-date-group');
-    const returnDateInput = cargoItem.querySelector('.cargo-return-date');
-    
-    const selectedType = DESTINATION_TYPES[Object.keys(DESTINATION_TYPES).find(key => 
-        DESTINATION_TYPES[key].id === select.value
-    )];
-    
-    if (selectedType && selectedType.requiresReturn) {
-        returnDateGroup.style.display = 'block';
-        returnDateInput.required = true;
-    } else {
-        returnDateGroup.style.display = 'none';
-        returnDateInput.required = false;
-        returnDateInput.value = '';
-    }
+    // Функция оставлена для совместимости и возможных будущих расширений
+    console.log('Тип назначения изменен:', select.value);
 }
 
 function getCargoItems() {
@@ -617,8 +609,7 @@ function getCargoItems() {
         items.push({
             description: item.querySelector('.cargo-description').value,
             quantity: parseInt(item.querySelector('.cargo-quantity').value),
-            destinationType: item.querySelector('.cargo-destination-type').value,
-            returnDate: item.querySelector('.cargo-return-date').value || null
+            destinationType: item.querySelector('.cargo-destination-type').value
         });
     });
     return items;
