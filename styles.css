@@ -875,41 +875,25 @@ input[list]::-webkit-calendar-picker-indicator:hover {
     padding: 15px;
 }
 
-/* Стили для блоков типов груза в таблице */
-.cargo-items-list .cargo-item-row {
-    padding: 4px 8px;
-    border-radius: 6px;
-    margin: 2px 0;
-    display: inline-block;
-}
-
+/* Оставить только стили для отображения в таблице */
 .cargo-items-list .cargo-item-row[data-type="sale"] {
     background-color: var(--cargo-sale-bg);
     color: var(--cargo-sale-text);
-    border-radius: 6px;
 }
 
 .cargo-items-list .cargo-item-row[data-type="rent_return"] {
     background-color: var(--cargo-rent-return-bg);
     color: var(--cargo-rent-return-text);
-    border-radius: 6px;
 }
 
 .cargo-items-list .cargo-item-row[data-type="rent_no_return"] {
     background-color: var(--cargo-rent-no-return-bg);
     color: var(--cargo-rent-no-return-text);
-    border-radius: 6px;
 }
 
 .cargo-items-list .cargo-item-row[data-type="service"] {
     background-color: var(--cargo-service-bg);
     color: var(--cargo-service-text);
-    border-radius: 6px;
-}
-
-/* Добавим небольшой отступ между блоками, если их несколько */
-.cargo-items-list .cargo-item-row + .cargo-item-row {
-    margin-top: 4px;
 }
 
 /* Футер */
